@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,6 +20,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailsService;
+
+    private final static String[] PERMIT_URL={
+            "/signup",
+            "/login"
+    };
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -43,12 +49,12 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 //ß.formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/signup", "/", "/login").permitAll()
+                        .requestMatchers(PERMIT_URL).permitAll()
                         .anyRequest().authenticated())
                 // 폼 로그인은 현재 사용하지 않음
-//				.formLogin(formLogin -> formLogin
-//						.loginPage("/login")
-//						.defaultSuccessUrl("/home"))
+				.formLogin(formLogin -> formLogin
+						.loginPage("/login")
+						.defaultSuccessUrl("/home"))
                 .logout((logout) -> logout
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true))
@@ -59,7 +65,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 

@@ -1,14 +1,18 @@
 package com.blog.framework.dto;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+@Getter
 public class UserDTO implements UserDetails {
     private String id;
-    private String passwd;
+    private String email;
+    private String password;
     private String authority;
+    private String name;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -16,12 +20,12 @@ public class UserDTO implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return name;
     }
 }
 

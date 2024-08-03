@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +23,16 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findByEmail(email);
-        if(userEntity != null){
-            List<GrantedAuthority> authorities = new ArrayList();
-            return new User(userEntity.getUserId(), userEntity.getPassword(), authorities);
-        }
-        return null;
+        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
+
+
+        return optionalUserEntity.map(userEntity -> {
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            // 권한을 여기에 추가할 수 있습니다. 예:
+            // authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+            return new User(userEntity.getUsername(), userEntity.getPassword(), authorities);
+        }).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
 }

@@ -1,11 +1,10 @@
 package com.blog.framework.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,19 +17,22 @@ import java.util.List;
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name="USER")			// 본인 테이블명과 맞춰주어야 함
+@AllArgsConstructor
+@Table(name="USER")
+@EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
 public class UserEntity implements UserDetails {
 
     @Id
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String userName;
     private String email;
     private String password;
-    private String name;
     private String phoneNumber;
-    private String userType;
     private String token;
+    @CreatedDate
     private LocalDateTime createdDttm;
+    @LastModifiedDate
     private LocalDateTime editedDttm;
     private LocalDateTime lastLoginDttm;
 

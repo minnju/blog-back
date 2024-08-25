@@ -13,11 +13,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     private final CustomUserDetailService customUserDetailsService;
 
@@ -47,16 +49,22 @@ public class SecurityConfig {
         Object AbstractHttpConfigurer;
         http	.csrf(csrf -> csrf.disable())
                 .httpBasic(Customizer.withDefaults())
-                //ß.formLogin(AbstractHttpConfigurer::disable)
+                //ß.formLogin(AbstractHttpConfigurer::disable
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(PERMIT_URL).permitAll()
                         .anyRequest().authenticated())
                 // 폼 로그인은 현재 사용하지 않음
 				.formLogin(formLogin -> formLogin
-						.loginPage("/login")
-						.defaultSuccessUrl("/home"))
+                        .loginProcessingUrl("/login") // 서버에서 로그인 요청을 처리할 URL
+                        .usernameParameter("email") // 이메일을 username으로 사용
+                        .passwordParameter("password")
+                        .failureHandler((request, response, exception) -> {
+                            // 로그인 실패 후 클라이언트 애플리케이션으로 리다이렉트
+                            response.sendRedirect("http://localhost:3000/signin?error");
+                        })
+                        .permitAll())
                 .logout((logout) -> logout
-                        .logoutSuccessUrl("/login")
+                        //.logoutSuccessUrl("/login")
                         .invalidateHttpSession(true))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -67,6 +75,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000") // 프론트엔드 URL
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
 }

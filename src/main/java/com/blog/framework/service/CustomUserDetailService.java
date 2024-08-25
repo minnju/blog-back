@@ -4,6 +4,7 @@ import com.blog.framework.entity.UserEntity;
 import com.blog.framework.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,11 +28,16 @@ public class CustomUserDetailService implements UserDetailsService {
 
 
         return optionalUserEntity.map(userEntity -> {
+            // 권한 설정
             List<GrantedAuthority> authorities = new ArrayList<>();
-            // 권한을 여기에 추가할 수 있습니다. 예:
-            // authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-            return new User(userEntity.getUsername(), userEntity.getPassword(), authorities);
+            // UserDetails 객체 생성
+            return new User(
+                    userEntity.getEmail(), // 사용자 이름으로 이메일 사용
+                    userEntity.getPassword(), // 암호화된 비밀번호
+                    authorities
+            );
         }).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 

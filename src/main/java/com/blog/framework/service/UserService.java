@@ -1,5 +1,6 @@
 package com.blog.framework.service;
 
+import com.blog.framework.dto.LoginReqDTO;
 import com.blog.framework.dto.UserDTO;
 import com.blog.framework.entity.UserEntity;
 import com.blog.framework.repository.UserRepository;
@@ -8,6 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Base64.Decoder;
+import java.util.Base64;
 
 @Service
 @Transactional
@@ -18,15 +24,18 @@ public class UserService {
 
     public String createUser(UserDTO  userDTO){
         try {
-            userRepository.findByEmail(userDTO.getEmail()).ifPresent(m -> {
+            Decoder decoder = Base64.getDecoder();
+            String email = new String(decoder.decode(userDTO.getEmail()));
+            String password = new String(decoder.decode(userDTO.getPassword()));
+            userRepository.findByEmail(email).ifPresent(m -> {
                 throw new IllegalArgumentException("이미 가입된 유저입니다.");
             });
 
             //비밀번호 암호화
-            String encodepwd = passwordEncoder.encode( userDTO.getPassword());
+            String encodepwd = passwordEncoder.encode( password);
 
             UserEntity savedUser = new UserEntity();
-            savedUser.setEmail(userDTO.getEmail());
+            savedUser.setEmail(email);
             savedUser.setUserName(userDTO.getUsername());
             savedUser.setPassword(encodepwd);
             //가입된 유저의 이름 반환
@@ -35,5 +44,9 @@ public class UserService {
             throw e;
         }
 
+    }
+
+    public UserDTO login(LoginReqDTO reqDTO){
+        return new UserDTO();
     }
 }

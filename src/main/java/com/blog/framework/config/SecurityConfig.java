@@ -1,9 +1,11 @@
 package com.blog.framework.config;
 
 import com.blog.framework.service.CustomUserDetailService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +14,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -36,7 +44,6 @@ public class SecurityConfig implements WebMvcConfigurer {
         return provider;
     }
 
-    // 스프링 시큐리티 기능 비활성화 (H2 DB 접근을 위해)
 	@Bean
 	public WebSecurityCustomizer configure() {
 		return (web -> web.ignoring()
@@ -49,32 +56,43 @@ public class SecurityConfig implements WebMvcConfigurer {
         Object AbstractHttpConfigurer;
         http	.csrf(csrf -> csrf.disable())
                 .httpBasic(Customizer.withDefaults())
-                //ß.formLogin(AbstractHttpConfigurer::disable
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(PERMIT_URL).permitAll()
                         .anyRequest().authenticated())
-                // 폼 로그인은 현재 사용하지 않음
 				.formLogin(formLogin -> formLogin
                         .loginProcessingUrl("/login") // 서버에서 로그인 요청을 처리할 URL
                         .usernameParameter("email") // 이메일을 username으로 사용
                         .passwordParameter("password")
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK); // 성공 시 HTTP 200 응답만 전송
+                        })
                         .failureHandler((request, response, exception) -> {
-                            // 로그인 실패 후 클라이언트 애플리케이션으로 리다이렉트
-                            response.sendRedirect("http://localhost:3000/signin?error");
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed"); // 실패 시 HTTP 401 응답 전송
                         })
                         .permitAll())
                 .logout((logout) -> logout
-                        //.logoutSuccessUrl("/login")
+                        .logoutUrl("/logout")
                         .invalidateHttpSession(true))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .sessionManagement((auth)->auth
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true));
         return http.build();
     }
 
     @Bean
     public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private AuthenticationEntryPoint authenticationEntryPoint() {
+        return new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
+    }
+
+    private LogoutSuccessHandler logoutSuccessHandler() {
+        return new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK);
     }
 
     @Override
@@ -84,6 +102,15 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+    }
+
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+        cookieSerializer.setCookieName("JSESSIONID");
+        cookieSerializer.setCookiePath("/");
+        cookieSerializer.setCookieMaxAge(3600); // 쿠키 만료 시간 (초)
+        return cookieSerializer;
     }
 
 }

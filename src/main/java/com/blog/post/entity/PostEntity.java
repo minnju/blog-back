@@ -1,4 +1,4 @@
-package com.blog.framework.entity;
+package com.blog.post.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,30 +14,29 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="USER")
+@Table(name="POST")
 @EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
-public class UserEntity extends AuditEntity implements UserDetails {
+public class PostEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String userName;
-    private String email;
-    private String password;
-    private String phoneNumber;
-    private String token;
+    private Long postId;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("user"));
-    }
+    private String title;
+    private String description;
+    private String imageUrl;
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+    @CreatedDate
+    private LocalDateTime createdDttm;
+    @LastModifiedDate
+    private LocalDateTime editedDttm;
+
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
+    private ContentEntity content;
+
+
 }

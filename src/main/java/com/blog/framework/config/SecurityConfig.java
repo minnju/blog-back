@@ -64,10 +64,15 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .usernameParameter("email") // 이메일을 username으로 사용
                         .passwordParameter("password")
                         .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK); // 성공 시 HTTP 200 응답만 전송
+                            response.setStatus(HttpServletResponse.SC_OK); // 성공 시 HTTP 200 응답
+                            // JSON 응답 예시
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"status\": \"success\"}");
                         })
                         .failureHandler((request, response, exception) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed"); // 실패 시 HTTP 401 응답 전송
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 실패 시 HTTP 401 응답
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"status\": \"failure\", \"message\": \"Authentication Failed\"}");
                         })
                         .permitAll())
                 .logout((logout) -> logout

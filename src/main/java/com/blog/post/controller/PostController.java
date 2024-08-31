@@ -39,7 +39,7 @@ public class PostController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<PostVo>> login(@RequestBody PostReqVo reqVo) {
+    public ResponseEntity<List<PostVo>> login(@ModelAttribute PostReqVo reqVo) {
         List<PostVo> postList = postService.retrieveAllPost(reqVo);
         return new ResponseEntity<>(postList, HttpStatus.OK);
     }

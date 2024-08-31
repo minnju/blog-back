@@ -34,9 +34,11 @@ public class UserEntity extends AuditEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("user"));
     }
-
+    protected void onCreate() {
+        this.setCreateId(this.id);
+    }
     @Override
     public String getUsername() {
-        return email;
+        return userName;
     }
 }

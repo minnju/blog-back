@@ -43,7 +43,7 @@ public class PostService {
     public List<PostVo> retrieveAllPost(PostReqVo reqVo){
         List<PostEntity> postList = postRespository.findAll();
         return postList.stream()
-                .map(postEntity -> new PostVo(postEntity.getPostId(), postEntity.getTitle(), postEntity.getContent(),postEntity.getDescription(), postEntity.getImageUrl()))
+                .map(postEntity -> new PostVo(postEntity.getPostId(), postEntity.getTitle(), postEntity.getContent(),postEntity.getDescription(), postEntity.getImageUrl(), postEntity.getAuthorNm()))
                 .collect(Collectors.toList());
     }
 

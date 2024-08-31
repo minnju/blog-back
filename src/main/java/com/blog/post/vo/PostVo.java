@@ -15,4 +15,5 @@ public class PostVo {
     private String content;
     private String description;
     private String imageUrl;
+    private String authorNm;
 }

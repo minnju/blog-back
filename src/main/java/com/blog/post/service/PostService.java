@@ -3,6 +3,7 @@ package com.blog.post.service;
 import com.blog.post.entity.ContentEntity;
 import com.blog.post.entity.PostEntity;
 import com.blog.post.repository.PostRespository;
+import com.blog.post.vo.PostReqVo;
 import com.blog.post.vo.PostVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostVo> retrieveAllPost(){
+    public List<PostVo> retrieveAllPost(PostReqVo reqVo){
         List<PostEntity> postList = postRespository.findAll();
         return postList.stream()
                 .map(postEntity -> new PostVo(postEntity.getPostId(), postEntity.getTitle(), postEntity.getContent().getContent(),postEntity.getDescription(), postEntity.getImageUrl()))
@@ -43,10 +44,14 @@ public class PostService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean retrieveAllPost(long postId) throws Exception {
+    public boolean deletePost(long postId) throws Exception {
         PostEntity deleteEntity = postRespository.findByPostId(postId).orElseThrow(()->new Exception("존재하지 않는 게시물입니다."));
         postRespository.delete(deleteEntity);
         postRespository.flush();
+        return true;
+    }
+
+    public boolean updatePost(PostVo postVo) {
         return true;
     }
 }

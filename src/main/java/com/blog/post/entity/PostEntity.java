@@ -1,5 +1,6 @@
 package com.blog.post.entity;
 
+import com.blog.framework.entity.AuditEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name="POST")
 @EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
-public class PostEntity {
+public class PostEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +30,7 @@ public class PostEntity {
     private String title;
     private String description;
     private String imageUrl;
-
-    @CreatedDate
-    private LocalDateTime createdDttm;
-    @LastModifiedDate
-    private LocalDateTime editedDttm;
+    private boolean isMain;
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
     private ContentEntity content;

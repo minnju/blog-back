@@ -108,7 +108,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
         cookieSerializer.setCookieName("JSESSIONID");
-        cookieSerializer.setCookiePath("/");
+        cookieSerializer.setCookiePath("/"); // 쿠키의 경로 설정
         cookieSerializer.setCookieMaxAge(3600); // 쿠키 만료 시간 (초)
         return cookieSerializer;
     }

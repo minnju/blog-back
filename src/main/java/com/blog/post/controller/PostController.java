@@ -21,7 +21,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/save")
-    public ResponseEntity<?> savePost(@ModelAttribute PostVo postVo) {
+    public ResponseEntity<?> savePost(@RequestBody PostVo postVo) {
         boolean result = postService.savePost(postVo);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

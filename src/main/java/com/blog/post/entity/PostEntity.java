@@ -29,11 +29,9 @@ public class PostEntity extends AuditEntity {
 
     private String title;
     private String description;
+    private String content;
     private String imageUrl;
     private boolean isMain;
-
-    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
-    private ContentEntity content;
-
+    private String authorNm;
 
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,24 +22,12 @@ public class CustomUserDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
-
-
-        return optionalUserEntity.map(userEntity -> {
-            // 권한 설정
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-
-            // UserDetails 객체 생성
-            return new User(
-                    userEntity.getEmail(), // 사용자 이름으로 이메일 사용
-                    userEntity.getPassword(), // 암호화된 비밀번호
-                    authorities
-            );
-        }).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        return user; // UserEntity는 UserDetails를 구현하고 있으므로 바로 반환
     }
 
 }

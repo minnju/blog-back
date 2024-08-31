@@ -21,7 +21,6 @@ import java.util.List;
 @Table(name="USER")
 @EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
 public class UserEntity extends AuditEntity implements UserDetails {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

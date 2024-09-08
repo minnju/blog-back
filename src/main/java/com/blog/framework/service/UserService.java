@@ -4,9 +4,14 @@ import com.blog.framework.dto.LoginReqDTO;
 import com.blog.framework.dto.UserDTO;
 import com.blog.framework.entity.UserEntity;
 import com.blog.framework.repository.UserRepository;
+import com.blog.framework.util.JwtTokenUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.Authenticator;
 import org.apache.catalina.User;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,9 +30,10 @@ import java.util.Base64;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    public String createUser(UserDTO  userDTO){
-        try {
+    public String createUser(UserDTO  userDTO) throws IllegalArgumentException {
             Decoder decoder = Base64.getDecoder();
             String email = new String(decoder.decode(userDTO.getEmail()));
             String password = new String(decoder.decode(userDTO.getPassword()));
@@ -38,16 +44,15 @@ public class UserService {
             //비밀번호 암호화
             String encodepwd = passwordEncoder.encode( password);
 
-            UserEntity savedUser = new UserEntity();
-            savedUser.setEmail(email);
-            savedUser.setUserName(userDTO.getUsername());
-            savedUser.setPassword(encodepwd);
+            UserEntity savedUser = UserEntity.builder()
+                    .phoneNumber(userDTO.getPhoneNumber())
+                    .email(email)
+                    .password(encodepwd)
+                    .userName(userDTO.getUsername())
+                    .build();
+
             //가입된 유저의 이름 반환
             return userRepository.save(savedUser).getUsername();
-        } catch (IllegalArgumentException e) {
-            throw e;
-        }
-
     }
 
     public UserEntity getCurrentUser() {
@@ -59,6 +64,15 @@ public class UserService {
     }
 
     public UserDTO login(LoginReqDTO reqDTO){
-        return new UserDTO();
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(reqDTO.getEmail(), reqDTO.getPassword()));
+
+        String token = jwtTokenUtil.createAccessToken(reqDTO);
+
+        ModelMapper modelMapper = new ModelMapper();
+        UserEntity userInfo = userRepository.findByEmail(reqDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found!"));
+        UserDTO resInfo = modelMapper.map(userInfo, UserDTO.class);
+        resInfo.setToken(token);
+        return resInfo;
     }
 }

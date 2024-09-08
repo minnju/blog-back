@@ -15,8 +15,10 @@ public class UserDTO implements UserDetails {
     private String id;
     private String email;
     private String password;
+    private String phoneNumber;
     private String authority;
     private String name;
+    private String token;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

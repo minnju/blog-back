@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +28,6 @@ public class UserEntity extends AuditEntity implements UserDetails {
     private String email;
     private String password;
     private String phoneNumber;
-    private String token;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

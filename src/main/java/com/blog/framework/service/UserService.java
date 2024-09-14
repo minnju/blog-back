@@ -5,6 +5,8 @@ import com.blog.framework.dto.UserDTO;
 import com.blog.framework.entity.UserEntity;
 import com.blog.framework.repository.UserRepository;
 import com.blog.framework.util.JwtTokenUtil;
+import com.blog.framework.util.RedisUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.Authenticator;
@@ -23,6 +25,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Base64.Decoder;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -32,6 +35,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
+    private final RedisUtil redisUtil;
 
     public String createUser(UserDTO  userDTO) throws IllegalArgumentException {
             Decoder decoder = Base64.getDecoder();
@@ -74,5 +78,13 @@ public class UserService {
         UserDTO resInfo = modelMapper.map(userInfo, UserDTO.class);
         resInfo.setToken(token);
         return resInfo;
+    }
+
+    public void logout(UserDTO user, HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        Long expirationTime = jwtTokenUtil.getExpiration(token);
+        // Redis에 토큰 저장 (만료 시간 설정)
+        redisUtil.setBlackList(token, true, expirationTime);
+
     }
 }

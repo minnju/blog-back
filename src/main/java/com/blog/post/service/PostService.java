@@ -2,11 +2,11 @@ package com.blog.post.service;
 
 import com.blog.framework.entity.UserEntity;
 import com.blog.framework.service.UserService;
-import com.blog.post.entity.ContentEntity;
 import com.blog.post.entity.PostEntity;
 import com.blog.post.repository.PostRespository;
 import com.blog.post.vo.PostReqVo;
 import com.blog.post.vo.PostVo;
+import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,13 @@ public class PostService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean savePost(PostVo postVo) {
         UserEntity user = userService.getCurrentUser();
+        String default_imageUrl = "https://picsum.photos/800/450?random=1";
 
         PostEntity post = PostEntity.builder()
                 .title(postVo.getTitle())
                 .content(postVo.getContent())
                 .description(postVo.getDescription())
-                .imageUrl(postVo.getImageUrl())
+                .imageUrl(StringUtil.isNullOrEmpty(postVo.getImageUrl())?default_imageUrl:postVo.getImageUrl())
                 .authorNm(user.getUsername())
                 .build();
 

@@ -3,6 +3,7 @@ package com.blog.post.entity;
 import com.blog.framework.entity.AuditEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -33,5 +34,16 @@ public class PostEntity extends AuditEntity {
     private String imageUrl;
     private boolean isMain;
     private String authorNm;
+
+    @OneToMany(mappedBy="post" ,fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    private List<CommentEntity> comments;
+
+    public void addComment(CommentEntity comment){
+        this.getComments().add(comment);
+        comment.setPost(this);
+    }
+
+
+
 
 }

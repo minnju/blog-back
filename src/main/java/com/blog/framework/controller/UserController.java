@@ -3,6 +3,7 @@ package com.blog.framework.controller;
 import com.blog.framework.dto.LoginReqDTO;
 import com.blog.framework.dto.UserDTO;
 import com.blog.framework.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,10 @@ public class UserController {
         return new ResponseEntity<>(username, HttpStatus.OK);
     }
 
+    /*@PostMapping("/logout")
+    public ResponseEntity<?> logout(@ModelAttribute UserDTO user, HttpServletRequest request) {
+        userService.logout(user, request);
+        return ResponseEntity.ok("Logged out successfully");
+    }*/
 
 }

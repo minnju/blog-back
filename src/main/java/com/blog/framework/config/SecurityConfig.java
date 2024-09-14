@@ -2,6 +2,8 @@ package com.blog.framework.config;
 
 import com.blog.framework.filter.JwtAuthenticationFilter;
 import com.blog.framework.service.CustomUserDetailService;
+import com.blog.framework.util.JwtTokenUtil;
+import com.blog.framework.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +36,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +45,8 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     private final CustomUserDetailService customUserDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final RedisUtil redisUtil;
 
     private final static String[] PERMIT_URL={
             "/signup",
@@ -73,10 +79,23 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .logoutSuccessHandler(new LogoutSuccessHandler() {
                             @Override
                             public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
-                                                        org.springframework.security.core.Authentication authentication)
-                                    {
-                                // 리디렉션 없이 200 응답만 반환
+                                                        Authentication authentication) {
+                                String token = resolveToken(request);
+                                if (token != null) {
+                                    Long expirationTime = jwtTokenUtil.getExpiration(token);
+                                    // Redis에 토큰 블랙리스트 추가
+                                    redisUtil.setBlackList(token, true, expirationTime);
+                                }
+                                // 리디렉션 없이 200 응답 반환
                                 response.setStatus(HttpServletResponse.SC_OK);
+                            }
+
+                            private String resolveToken(HttpServletRequest request) {
+                                String bearerToken = request.getHeader("Authorization");
+                                if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                                    return bearerToken.substring(7);
+                                }
+                                return null;
                             }
                         })
                         )

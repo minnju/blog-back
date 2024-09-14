@@ -4,6 +4,7 @@ import com.blog.framework.dto.LoginReqDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,14 +14,17 @@ import java.util.Date;
 
 @Component
 @Slf4j
+//@RequiredArgsConstructor
 public class JwtTokenUtil {
     private final Key key;
-    private final long expirationTime;
+    private  long expirationTime;
+    private  RedisUtil redisUtil;
 
     public JwtTokenUtil(
             @Value("${jwt.secret.key}") String secretKey,
-            @Value("${jwt.expiration_time}") long accessTokenExpTime
+            @Value("${jwt.expiration_time}") long accessTokenExpTime, RedisUtil redisUtil
     ) {
+        this.redisUtil = redisUtil;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.expirationTime = accessTokenExpTime;
@@ -66,6 +70,10 @@ public class JwtTokenUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            if (redisUtil.hasKeyBlackList(token)){
+                // TODO 에러 발생시키는 부분 수정
+                throw new RuntimeException("Logout Token");
+            }
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
@@ -91,5 +99,13 @@ public class JwtTokenUtil {
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+    public Long getExpiration(String accessToken) {
+        // accessToken 남은 유효시간
+        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody().getExpiration();
+        // 현재 시간
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
     }
 }

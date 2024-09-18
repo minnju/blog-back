@@ -20,7 +20,7 @@ spring:
       port: 6379
       host: redis
   datasource:
-    url: jdbc:mysql://mysql:3306/mandu?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+    url: jdbc:mysql://mysql:3306/mandu?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&characterEncoding=utf8
     username: root
     password: 19970923
     driver-class-name: com.mysql.cj.jdbc.Driver

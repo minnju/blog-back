@@ -33,10 +33,5 @@ public class UserController {
         return new ResponseEntity<>(username, HttpStatus.OK);
     }
 
-    /*@PostMapping("/logout")
-    public ResponseEntity<?> logout(@ModelAttribute UserDTO user, HttpServletRequest request) {
-        userService.logout(user, request);
-        return ResponseEntity.ok("Logged out successfully");
-    }*/
 
 }

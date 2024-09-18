@@ -80,11 +80,5 @@ public class UserService {
         return resInfo;
     }
 
-    public void logout(UserDTO user, HttpServletRequest request) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        Long expirationTime = jwtTokenUtil.getExpiration(token);
-        // Redis에 토큰 저장 (만료 시간 설정)
-        redisUtil.setBlackList(token, true, expirationTime);
 
-    }
 }

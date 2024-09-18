@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="LIKE_TABLE")
-@EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
+@EntityListeners(AuditingEntityListener.class)
 public class LikeEntity extends AuditEntity {
     @EmbeddedId
     private LikeId likeId;

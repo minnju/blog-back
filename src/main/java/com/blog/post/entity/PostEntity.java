@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="POST")
-@EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
+@EntityListeners(AuditingEntityListener.class)
 public class PostEntity extends AuditEntity {
 
     @Id
@@ -36,7 +37,7 @@ public class PostEntity extends AuditEntity {
     private String authorNm;
 
     @OneToMany(mappedBy="post" ,fetch = FetchType.LAZY, cascade=CascadeType.ALL)
-    private List<CommentEntity> comments;
+    private List<CommentEntity> comments  = new ArrayList<>();
 
     public void addComment(CommentEntity comment){
         this.getComments().add(comment);

@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="COMMENT")
-@EntityListeners(AuditingEntityListener.class)// 본인 테이블명과 맞춰주어야 함
+@EntityListeners(AuditingEntityListener.class)
 public class CommentEntity extends AuditEntity {
 
     @Id

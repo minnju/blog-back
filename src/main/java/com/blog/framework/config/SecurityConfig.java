@@ -50,7 +50,9 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     private final static String[] PERMIT_URL={
             "/api/signup", // 수정된 경로
-            "/api/login"
+            "/api/login",
+            "/signup", // 수정된 경로
+            "/login"
     };
 
     @Bean

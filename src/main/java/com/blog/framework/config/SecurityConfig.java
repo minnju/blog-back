@@ -49,8 +49,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     private final RedisUtil redisUtil;
 
     private final static String[] PERMIT_URL={
-            "/signup",
-            "/login"
+            "/api/signup", // 수정된 경로
+            "/api/login"
     };
 
     @Bean
@@ -127,7 +127,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000") // 프론트엔드 URL
+                .allowedOrigins("http://13.57.119.254") // 실제 IP 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);

@@ -126,7 +126,7 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
+        registry.addMapping("/api/**") // /api/** 패턴으로 변경
                 .allowedOrigins("http://13.57.119.254") // 실제 IP 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
